@@ -403,14 +403,33 @@ function wireFileTransferEvents() {
   });
 
   ft.addEventListener("receive-complete", (e) => {
-    const { id, name, blob } = e.detail;
-    const li = document.getElementById(`file-${id}`);
-    if (!li) return;
-    const url = URL.createObjectURL(blob);
-    li.innerHTML = `
-      <span class="fname">↓ ${escapeHtml(name)}</span>
-      <a href="${url}" download="${escapeHtml(name)}">Download</a>`;
+  const { id, name, blob } = e.detail;
+  const li = document.getElementById(`file-${id}`);
+  if (!li) return;
+  const url = URL.createObjectURL(blob);
+
+  const fname = document.createElement("span");
+  fname.className = "fname";
+  fname.textContent = `↓ ${name}`;
+
+  const dlBtn = document.createElement("a");
+  dlBtn.textContent = "Download";
+  dlBtn.href = "#";
+  dlBtn.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    const tmp = document.createElement("a");
+    tmp.href = url;
+    tmp.download = name;
+    tmp.style.display = "none";
+    document.body.appendChild(tmp);
+    tmp.click();
+    document.body.removeChild(tmp);
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
   });
+
+  li.innerHTML = "";
+  li.append(fname, dlBtn);
+});
 }
 
 function escapeHtml(str) {
@@ -508,8 +527,9 @@ els.leaveConfirmBtn.addEventListener("click", () => {
 });
 
 window.addEventListener("beforeunload", () => {
-  state.signaling?.send({ type: "leave" });
+  if (document.visibilityState !== "hidden") {
+    state.signaling?.send({ type: "leave" });
+  }
 });
-
 // ---------------------------------------------------------------- init
 resetToHome();
