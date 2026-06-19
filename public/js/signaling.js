@@ -8,6 +8,7 @@ export class Signaling extends EventTarget {
     this.url = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
     this._reconnectAttempts = 0;
     this._manualClose = false;
+    this._keepaliveTimer = null;
   }
 
   connect() {
@@ -15,9 +16,15 @@ export class Signaling extends EventTarget {
     this.ws = new WebSocket(this.url);
 
     this.ws.addEventListener("open", () => {
-      this._reconnectAttempts = 0;
-      this.dispatchEvent(new Event("open"));
-    });
+  this._reconnectAttempts = 0;
+  clearInterval(this._keepaliveTimer);
+  this._keepaliveTimer = setInterval(() => {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: "ping" }));
+    }
+  }, 20_000);
+  this.dispatchEvent(new Event("open"));
+});
 
     this.ws.addEventListener("message", (event) => {
       let msg;
@@ -30,9 +37,10 @@ export class Signaling extends EventTarget {
     });
 
     this.ws.addEventListener("close", () => {
-      this.dispatchEvent(new Event("close"));
-      if (!this._manualClose) this._scheduleReconnect();
-    });
+  clearInterval(this._keepaliveTimer);
+  this.dispatchEvent(new Event("close"));
+  if (!this._manualClose) this._scheduleReconnect();
+});
 
     this.ws.addEventListener("error", () => {
       this.dispatchEvent(new Event("error"));
@@ -54,7 +62,8 @@ export class Signaling extends EventTarget {
   }
 
   close() {
-    this._manualClose = true;
-    if (this.ws) this.ws.close();
+  this._manualClose = true;
+  clearInterval(this._keepaliveTimer);
+  if (this.ws) this.ws.close();
   }
 }
