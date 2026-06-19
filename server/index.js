@@ -30,8 +30,8 @@ const PORT = process.env.PORT || 8080;
 
 // Characters chosen to avoid visual ambiguity (no 0/O, 1/I/L).
 const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
-const ROOM_JOIN_TIMEOUT_MS = 10 * 60 * 1000; // 10 min to wait for a peer
-const ROOM_IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 min of silence -> expire
+const ROOM_JOIN_TIMEOUT_MS = 60 * 60 * 1000;  // 1 hour to wait for peer
+const ROOM_IDLE_TIMEOUT_MS = 0 ; 
 const HEARTBEAT_INTERVAL_MS = 25 * 1000;
 
 /** @type {Map<string, Room>} */
@@ -195,12 +195,13 @@ setInterval(() => {
     socket.isAlive = false;
     socket.ping();
   }
-
+  if (ROOM_IDLE_TIMEOUT_MS > 0) {
   const now = Date.now();
   for (const room of rooms.values()) {
     if (now - room.lastActivity > ROOM_IDLE_TIMEOUT_MS) {
       room.destroy("idle_timeout");
     }
+  }
   }
 }, HEARTBEAT_INTERVAL_MS);
 
