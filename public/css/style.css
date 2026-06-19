@@ -226,6 +226,7 @@ button{ cursor:pointer; }
   display:flex; align-items:center; justify-content:center; z-index:50;
   padding:16px;
 }
+.overlay[hidden]{ display:none; }
 .settings-panel{
   background:var(--surface); border:1px solid var(--border); border-radius:10px;
   padding:20px; width:100%; max-width:360px; display:flex; flex-direction:column; gap:12px;
