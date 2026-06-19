@@ -3,7 +3,9 @@
    Design tokens live as CSS variables. System font stacks only (no webfont
    downloads) — keeps first-load weight tiny, which matters on slow networks.
    ============================================================================= */
-
+*{ box-sizing: border-box; }
+html,body{ height:100%; }
+[hidden]{ display:none !important; }
 :root{
   --bg:        #0b0d10;
   --surface:   #131619;
