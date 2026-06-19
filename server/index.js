@@ -93,7 +93,7 @@ function otherSide(room, socket) {
 // ---------------------------------------------------------------------------
 
 const app = express();
-app.use(express.static(path.join(__dirname, "..", "public"), { maxAge: "1h" }));
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 // Lightweight health/metrics endpoint — counts only, no content.
 app.get("/healthz", (req, res) => {
